@@ -4,15 +4,15 @@
 
 跟随这个指导，首先从Spark官网下载spark软件包。因为我们未必正在使用HDFS，你可以下载针对任何版本hadoop的spark软件包。
 
-注意，在Spark 2.0之前，spark主要的编程接口是弹性分布式数据集（Resilient Distributed Dataset:RDD）。Spark 2.0之后，RDDS被Dataset取代，Dataset跟RDD非常相似，但是具有更好的性能。RDD的接口2.0以后依然被支持，你可以在这里[RDD编程指导][1]获得更完整的参考。然而，我们更加推荐你使用Dataset,因为相对RDD，它有更好的性能。点击[SQL编程指导][2]获取更多关于Dataset的信息。
+注意，在Spark 2.0之前，spark主要的编程接口是弹性分布式数据集（Resilient Distributed Dataset:RDD）。Spark 2.0之后，RDDS被Dataset取代，Dataset跟RDD非常相似，但是具有更好的性能。RDD的接口在2.0以后依然被支持，你可以在这里[RDD编程指导][1]获得更完整的参考。然而，我们更加推荐你使用Dataset,因为相对RDD，它有更好的性能。点击[SQL编程指导][2]获取更多关于Dataset的信息。
 
 # 使用Spark Shell进行交互式分析
 ## 基础
-Spark的shell提供了一种简单方式来学习API，并且是一个交互式分析数据的强大工作。使用Scala和python语言都能轻松使用。在Spark目录下运行如下命令来启动它：
+Spark的shell提供了一种简单方式来学习API，并且是一个交互式分析数据的强大工具。使用Scala和python语言都能轻松使用。在Spark目录下运行如下命令来启动它：
 ```
 ./bin/spark-shell
 ```
-Spark的主要抽象是一个关于items的分布式集合，我们称之Dataset。Dataset可以创建自Hadppo inputFormats（例如HDFS的文件），或者通过其他Dataset来转换得到。现在，让我们使用Spark目录中的README文件内容来只做一个新的Dataset:
+Spark的主要抽象是一个关于items的分布式集合，我们称之Dataset。Dataset可以创建自Hadppo inputFormats（例如HDFS的文件），或者通过其他Dataset来转换得到。现在，让我们使用Spark目录中的README文件内容来制作一个新的Dataset:
 ```
 scala> val textFile = spark.read.textFile("README.md")
 textFile: org.apache.spark.sql.Dataset[String] = [value: string]
@@ -36,7 +36,7 @@ scala> textFile.filter(line => line.contains("Spark")).count() // How many lines
 res3: Long = 15
 ```
 ## 更多在Dataset上的操作
-Dataset的动作和转换可以被用于更复杂的计算。接下来让我们看看如何找到次数最多的一行：
+Dataset的动作和转换可以被用于更复杂的计算。接下来让我们看看如何找到文件中单词数最多的一行：
 ```
 scala> textFile.map(line => line.split(" ").size).reduce((a, b) => if (a > b) a else b)
 res4: Long = 15
