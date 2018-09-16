@@ -1,3 +1,4 @@
+![图片][5]
 [英文版原文][4]
 
 本教程为使用spark的快速入门介绍。首先我们会通过Spark的交互式shell(Python或者Scala)来介绍API，然后展示如何使用java、scala以及python来编写spark程序。
@@ -42,13 +43,31 @@ scala> textFile.map(line => line.split(" ").size).reduce((a, b) => if (a > b) a 
 res4: Long = 15
 ```
 
+首先将一行转换为整数值，创建一个Dataset。在Dataset上调用reduce来查找最大的单词数。map和reduce的参数值是Scala函数的字面值，并且能使用任何语言的特性或者Scala/Java库。例如，我们可以很容易地调用在别处声明的函数。下面，我们使用Math.max()函数来让代码更容易理解：
+```
+scala> import java.lang.Math
+import java.lang.Math
+
+scala> textFile.map(line => line.split(" ").size).reduce((a, b) => Math.max(a, b))
+res5: Int = 15
+```
 
 一个常见的是数据流模式是在hadoop中流行的mapreduce。Spark可以很容易地实现mapreducede：
+```
+scala> val wordCounts = textFile.flatMap(line => line.split(" ")).groupByKey(identity).count()
+wordCounts: org.apache.spark.sql.Dataset[(String, Long)] = [value: string, count(1): bigint]
+```
+这里，我们调用flatmap讲行的Dataset转换成单词的Dataset,然后结合groupByKey和count来计算文件中每个单词的个数，结果形式为（String,Long）对的Dataset。我们可以在shell中调用collect收集单词个数
+```
+scala> wordCounts.collect()
+res6: Array[(String, Int)] = Array((means,1), (under,2), (this,3), (Because,1), (Python,2), (agree,1), (cluster.,1), ...)
+```
+## 缓存
 
-> 未完
 
 
   [1]: http://spark.apache.org/docs/latest/rdd-programming-guide.html
   [2]: http://spark.apache.org/docs/latest/sql-programming-guide.html
   [3]: http://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset
   [4]: http://spark.apache.org/docs/latest/quick-start.html
+  [5]: http://kooola.com/upload/2018/06/7qanlnrum8i7jrg86u2vita3b2.jpg
