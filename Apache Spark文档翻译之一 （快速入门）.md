@@ -63,6 +63,40 @@ scala> wordCounts.collect()
 res6: Array[(String, Int)] = Array((means,1), (under,2), (this,3), (Because,1), (Python,2), (agree,1), (cluster.,1), ...)
 ```
 ## 缓存
+Spark支持将数据集放入一个集群式的内存缓存中。当数据需要经常被访问时非常有用，例如查询少量热点数据集或者当运行像PageRank这样的迭代算法。作为一个简单的示例，我们标记linesWithSpark数据集作为缓存：
+```
+scala> linesWithSpark.cache()
+res7: linesWithSpark.type = [value: string]
+
+scala> linesWithSpark.count()
+res8: Long = 15
+
+scala> linesWithSpark.count()
+res9: Long = 15
+```
+使用Spark来标记并缓存一个100行的文本看起来有点大材小用。有趣的地方是这些相同的方法可以运用到非常大的数据集上，甚至当它们被横跨几十个或几百个节点时。你要可以使用
+bin/spark-shell来链接集群进行交互式操作，详细介绍点击[RDD编程指导][6]
+
+## 程序实现
+假如我们想自己使用Spark API来编写程序。我们将使用scala（使用sdt）,java(使用maven),python(使用pip)来完成一个简单的程序。
+我们将使用Scala编写一个简单的Spark程序-如此简单，我们将它命名为SimpleApp.scala:
+```
+/* SimpleApp.scala */
+import org.apache.spark.sql.SparkSession
+
+object SimpleApp {
+  def main(args: Array[String]) {
+    val logFile = "YOUR_SPARK_HOME/README.md" // Should be some file on your system
+    val spark = SparkSession.builder.appName("Simple Application").getOrCreate()
+    val logData = spark.read.textFile(logFile).cache()
+    val numAs = logData.filter(line => line.contains("a")).count()
+    val numBs = logData.filter(line => line.contains("b")).count()
+    println(s"Lines with a: $numAs, Lines with b: $numBs")
+    spark.stop()
+  }
+}
+```
+
 
 
 
@@ -71,3 +105,4 @@ res6: Array[(String, Int)] = Array((means,1), (under,2), (this,3), (Because,1), 
   [3]: http://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset
   [4]: http://spark.apache.org/docs/latest/quick-start.html
   [5]: http://kooola.com/upload/2018/06/7qanlnrum8i7jrg86u2vita3b2.jpg
+  [6]: http://spark.apache.org/docs/latest/rdd-programming-guide.html#using-the-shell
