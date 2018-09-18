@@ -96,6 +96,60 @@ object SimpleApp {
   }
 }
 ```
+请注意，应用程序应定义main（）方法，而不是扩展scala.App。scala.App的子类有可能不能正确地工作。
+这个程序只用来计算Spark README文件中包含'a'和'b'的行数。注意，你需要使用Spark安装目录来替换代码中的YOUR_SPARK_HOME。不像前面使用Spark shell的例子（自动初始化SparkSession），在编写程序时需要考虑在使用前进行初始化。
+我们调用SparkSession.builder来构造一个SparkSession，设置程序名称，最后调用getOrCreate来得到一个实例。
+我们的程序依赖 Spark API，所以我们需要一个sbt的配置文件：build.sbt，表示Spark为一个依赖项。这个文件还添加了Spark的依赖库：
+```
+name := "Simple Project"
+
+version := "1.0"
+
+scalaVersion := "2.11.8"
+
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.3.1"
+```
+
+为了使sbt正常工作，我们需要根据典型的目录结构布局SimpleApp.scala和build.sbt。完成之后，我们可以创建一个包含应用程序代码的JAR包，然后使用spark-submit脚本来运行我们的程序：
+```
+# Your directory layout should look like this
+$ find .
+.
+./build.sbt
+./src
+./src/main
+./src/main/scala
+./src/main/scala/SimpleApp.scala
+
+# Package a jar containing your application
+$ sbt package
+...
+[info] Packaging {..}/{..}/target/scala-2.11/simple-project_2.11-1.0.jar
+
+# Use spark-submit to run your application
+$ YOUR_SPARK_HOME/bin/spark-submit \
+  --class "SimpleApp" \
+  --master local[4] \
+  target/scala-2.11/simple-project_2.11-1.0.jar
+...
+Lines with a: 46, Lines with b: 23
+```
+## 接下来
+恭喜你成功运行了第一个Spark程序。
+* 深入了解API，点击[RDD编程知道][7]和[SQL编程指导][8]
+* 想了解如何将程序运行到集群上，点击[部署概要][9]
+* 最后,examples目录中包含了几个示例 (Scala, Java, Python, R)，你可以像下面一样运行它们:
+
+```
+# For Scala and Java, use run-example:
+./bin/run-example SparkPi
+
+# For Python examples, use spark-submit directly:
+./bin/spark-submit examples/src/main/python/pi.py
+
+# For R examples, use spark-submit directly:
+./bin/spark-submit examples/src/main/r/dataframe.R
+```
 
 
 
@@ -106,3 +160,6 @@ object SimpleApp {
   [4]: http://spark.apache.org/docs/latest/quick-start.html
   [5]: http://kooola.com/upload/2018/06/7qanlnrum8i7jrg86u2vita3b2.jpg
   [6]: http://spark.apache.org/docs/latest/rdd-programming-guide.html#using-the-shell
+  [7]: http://spark.apache.org/docs/latest/rdd-programming-guide.html
+  [8]: http://spark.apache.org/docs/latest/sql-programming-guide.html
+  [9]: http://spark.apache.org/docs/latest/cluster-overview.html
